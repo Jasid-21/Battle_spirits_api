@@ -62,6 +62,12 @@ class websocketBuilder {
                 card.seted = true;
                 op_socket.emit('draw_card', {card, op_id: socket.id});
             });
+
+            socket.on('move_card', info => {
+                const op_id = info.op_id;
+                const op_socket = this.findSocket(op_id);
+                op_socket.emit('move_card', info);
+            });
         });
     }
 
