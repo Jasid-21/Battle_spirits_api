@@ -1,4 +1,4 @@
-const { createCode } = require('../helpers');
+const { createCode, buidDeck } = require('../helpers');
 const { Server } = require('socket.io');
 
 class websocketBuilder {
@@ -23,31 +23,37 @@ class websocketBuilder {
                 }
 
                 const username = info.username + '_' + createCode(5);
-                socket.username = username;
+                const deckString = info.deck;
+
+                socket.board_name = username;
+                socket.deck = deckString;
                 socket.join('hosting');
             });
 
             socket.on('start_duel', (info) => {
-                const op_username = info.username;
+                const { board_name, deckString } = info;
 
                 const ids = this.io.sockets.adapter.rooms.get('hosting');
                 const ids_array = ids?Array.from(ids):[];
                 console.log(ids_array);
-                const oponent_idx = ids_array.findIndex(id => this.io.sockets.sockets.get(id).username == op_username);
+                const oponent_idx = ids_array.findIndex(id => this.io.sockets.sockets.get(id).board_name == board_name);
 
                 if (oponent_idx == -1) {
                     socket.emit('socket_message', {msg: "Oponent not found..."});
                     return;
                 }
 
-                const op_socket = this.io.sockets.sockets.get(ids_array[oponent_idx]);
+                const op_socket = this.findSocket(ids_array[oponent_idx]);
+                const myDeck = buidDeck(deckString);
+                const opDeck = buidDeck(op_socket.deck);
+
                 op_socket.leave('hosting');
                 socket.leave('hosting');
                 op_socket.join('dueling')
                 socket.join('dueling');
 
-                op_socket.emit('duel_start', {op_id: socket.id});
-                socket.emit('duel_start', {op_id: op_socket.id});
+                op_socket.emit('duel_start', {op_id: socket.id, deck: opDeck});
+                socket.emit('duel_start', {op_id: op_socket.id, deck: myDeck});
             });
 
             socket.on('summon_card', ({ place, card_class, op_id }) => {
@@ -70,7 +76,7 @@ class websocketBuilder {
     getRooms() {
         const ids = this.io.sockets.adapter.rooms.get('hosting');
         const ids_array = ids?Array.from(ids):[];
-        const users = ids_array.map(id => this.io.sockets.sockets.get(id).username);
+        const users = ids_array.map(id => this.io.sockets.sockets.get(id).board_name);
         return users;
     }
 }
