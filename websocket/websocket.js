@@ -56,15 +56,11 @@ class websocketBuilder {
                 socket.emit('duel_start', {op_id: op_socket.id, deck: myDeck});
             });
 
-            socket.on('summon_card', ({ place, card_class, op_id }) => {
+            socket.on('draw_card', ({op_id, card}) => {
                 const op_socket = this.findSocket(op_id);
-                op_socket.emit('summon_card', { place, card_class });
-            });
-
-            socket.on('rest_unrest', ({card_id, place, op_id}) => {
-                console.log(op_id);
-                const op_socket = this.findSocket(op_id);
-                op_socket.emit('rest_unrest', {card_id, place});
+                console.log(card);
+                card.seted = true;
+                op_socket.emit('draw_card', {card, op_id: socket.id});
             });
         });
     }

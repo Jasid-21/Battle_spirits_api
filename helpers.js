@@ -12,8 +12,19 @@ function createCode(num) {
     return code;
 }
 
+class Card {
+    constructor(id, code) {
+        this.id = id;
+        this.code = code;
+        this.url = `https://battlespirits-saga.com/images/cards/card/${code}.png`;
+        this.seted = false;
+        this.rested = false;
+    }
+}
+
 function buidDeck(deckString) {
-    const deck = deckString.substring(1, deckString.length - 1).split(',');
+    const deckCodes = deckString.substring(1, deckString.length - 1).split(',');
+    const deck = deckCodes.map(code => new Card(createCode(11), code));
     
     return shuffleArray(deck);
 }
