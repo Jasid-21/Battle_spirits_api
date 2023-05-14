@@ -68,6 +68,12 @@ class websocketBuilder {
                 const op_socket = this.findSocket(op_id);
                 op_socket.emit('move_card', info);
             });
+
+            socket.on('rest_unrest', info => {
+                const { card_id, place, op_id } = info;
+                const op_socket = this.findSocket(op_id);
+                op_socket.emit('rest_unrest', { card_id, place });
+            });
         });
     }
 
