@@ -69,6 +69,12 @@ class websocketBuilder {
                 op_socket.emit('move_card', info);
             });
 
+            socket.on('return_to_deck', info => {
+                const op_id = info.op_id;
+                const op_socket = this.findSocket(op_id);
+                op_socket.emit('return_to_deck', info);
+            });
+
             socket.on('rest_unrest', info => {
                 const { card_id, place, op_id } = info;
                 const op_socket = this.findSocket(op_id);
