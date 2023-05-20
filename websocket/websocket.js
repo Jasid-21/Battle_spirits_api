@@ -58,27 +58,64 @@ class websocketBuilder {
 
             socket.on('draw_card', ({op_id, card}) => {
                 const op_socket = this.findSocket(op_id);
-                console.log(card);
-                card.seted = true;
+                if (!op_socket) { return; }
                 op_socket.emit('draw_card', {card, op_id: socket.id});
             });
 
             socket.on('move_card', info => {
                 const op_id = info.op_id;
+
                 const op_socket = this.findSocket(op_id);
+                if (!op_socket) { return; }
                 op_socket.emit('move_card', info);
             });
 
             socket.on('return_to_deck', info => {
                 const op_id = info.op_id;
+
                 const op_socket = this.findSocket(op_id);
+                if (!op_socket) { return; }
                 op_socket.emit('return_to_deck', info);
             });
 
             socket.on('rest_unrest', info => {
                 const { card_id, place, op_id } = info;
+
                 const op_socket = this.findSocket(op_id);
+                if (!op_socket) { return; }
                 op_socket.emit('rest_unrest', { card_id, place });
+            });
+
+            socket.on('looking_something', info => {
+                const op_id = info.op_id;
+
+                const op_socket = this.findSocket(op_id);
+                if (!op_socket) { return; }
+                op_socket.emit('looking_something', info);
+            });
+
+            socket.on('flip_burst_card', info => {
+                const op_id = info.op_id;
+                
+                const op_socket = this.findSocket(op_id);
+                if (!op_socket) { return; }
+                op_socket.emit('flip_burst_card', info);
+            });
+
+            socket.on('move_cores', info => {
+                const op_id = info.op_id;
+
+                const op_socket = this.findSocket(op_id);
+                if (!op_socket) { return; }
+                op_socket.emit('move_cores', info);
+            });
+
+            socket.on('increment_cores', info => {
+                const op_id = info.op_id;
+
+                const op_socket = this.findSocket(op_id);
+                if (!op_socket) { return; }
+                op_socket.emit('increment_cores', info);
             });
         });
     }

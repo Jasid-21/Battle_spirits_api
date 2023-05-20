@@ -19,6 +19,10 @@ class Card {
         this.url = `https://battlespirits-saga.com/images/cards/card/${code}.png`;
         this.seted = false;
         this.rested = false;
+        this.cores = {
+            commons: 0,
+            soul: 0
+        }
     }
 }
 
