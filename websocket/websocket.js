@@ -1,4 +1,4 @@
-const { createCode, buidDeck } = require('../helpers');
+const { createCode, buidDeck, createCoresObject, Core } = require('../helpers');
 const { Server } = require('socket.io');
 
 class websocketBuilder {
@@ -46,20 +46,34 @@ class websocketBuilder {
                 const op_socket = this.findSocket(ids_array[oponent_idx]);
                 const myDeck = buidDeck(deckString);
                 const opDeck = buidDeck(op_socket.deck);
+                const myCores = createCoresObject();
+                const opCores = createCoresObject();
 
                 op_socket.leave('hosting');
                 socket.leave('hosting');
                 op_socket.join('dueling')
                 socket.join('dueling');
 
-                op_socket.emit('duel_start', {op_id: socket.id, deck: opDeck});
-                socket.emit('duel_start', {op_id: op_socket.id, deck: myDeck});
+                op_socket.emit('duel_start', {
+                    op_id: socket.id, 
+                    deck: opDeck, 
+                    op_deck: myDeck,
+                    cores: opCores,
+                    op_cores: myCores
+                });
+                socket.emit('duel_start', {
+                    op_id: op_socket.id, 
+                    deck: myDeck, 
+                    op_deck: opDeck,
+                    cores: myCores,
+                    op_cores: opCores
+                });
             });
 
-            socket.on('draw_card', ({op_id, card}) => {
+            socket.on('draw_card', ({ op_id }) => {
                 const op_socket = this.findSocket(op_id);
                 if (!op_socket) { return; }
-                op_socket.emit('draw_card', {card, op_id: socket.id});
+                op_socket.emit('draw_card', { player_org: socket.id });
             });
 
             socket.on('move_card', info => {
@@ -112,10 +126,12 @@ class websocketBuilder {
 
             socket.on('increment_cores', info => {
                 const op_id = info.op_id;
-
                 const op_socket = this.findSocket(op_id);
                 if (!op_socket) { return; }
-                op_socket.emit('increment_cores', info);
+
+                const core = new Core(createCode(5));
+                socket.emit('increment_cores', {...info, core});
+                op_socket.emit('increment_cores', {...info, core});
             });
         });
     }

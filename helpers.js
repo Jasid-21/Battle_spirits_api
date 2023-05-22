@@ -19,10 +19,27 @@ class Card {
         this.url = `https://battlespirits-saga.com/images/cards/card/${code}.png`;
         this.seted = false;
         this.rested = false;
-        this.cores = {
-            commons: 0,
-            soul: 0
-        }
+        this.cores = []
+    }
+}
+
+class Core {
+    constructor(id, soul = false) {
+        this.id = id;
+        this.soul = soul;
+        this.selected = false;
+    }
+}
+
+function createCoresObject() {
+    return {
+        in_life: Array.from({length: 5}, () => new Core(createCode(5))),
+        in_reserve: [
+            ...Array.from({length: 3}, () => new Core(createCode(5))), 
+            new Core(createCode(5), true)
+        ],
+        in_trash: [],
+        in_void: []
     }
 }
 
@@ -34,6 +51,7 @@ function buidDeck(deckString) {
 }
 
 function shuffleArray(array) {
+    createCoresObject();
     for (var i = array.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
         var temp = array[i];
@@ -44,4 +62,4 @@ function shuffleArray(array) {
     return array;
 }
 
-module.exports = {createCode, buidDeck};
+module.exports = {Core, createCode, buidDeck, createCoresObject};
