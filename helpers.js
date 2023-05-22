@@ -62,4 +62,8 @@ function shuffleArray(array) {
     return array;
 }
 
-module.exports = {Core, createCode, buidDeck, createCoresObject};
+function generateRandomTurn() {
+    return Math.round(Math.random());
+}
+
+module.exports = {Core, createCode, buidDeck, createCoresObject, generateRandomTurn};
