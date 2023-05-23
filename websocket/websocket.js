@@ -25,18 +25,19 @@ class websocketBuilder {
                 const username = info.username + '_' + createCode(5);
                 const deckString = info.deck;
 
-                socket.board_name = username;
+                socket.username = username;
                 socket.deck = deckString;
                 socket.join('hosting');
             });
 
             socket.on('start_duel', (info) => {
-                const { board_name, deckString } = info;
+                const { board_name, deckString, username } = info;
+                socket.username = username;
 
                 const ids = this.io.sockets.adapter.rooms.get('hosting');
                 const ids_array = ids?Array.from(ids):[];
                 console.log(ids_array);
-                const oponent_idx = ids_array.findIndex(id => this.io.sockets.sockets.get(id).board_name == board_name);
+                const oponent_idx = ids_array.findIndex(id => this.io.sockets.sockets.get(id).username == board_name);
 
                 if (oponent_idx == -1) {
                     socket.emit('socket_message', {msg: "Oponent not found..."});
@@ -48,7 +49,17 @@ class websocketBuilder {
                 const opDeck = buidDeck(op_socket.deck);
                 const myCores = createCoresObject();
                 const opCores = createCoresObject();
-                const active = generateRandomTurn();
+                const active = generateRandomTurn()==1;
+                const players = [
+                    {
+                        username,
+                        id: socket.id
+                    },
+                    {
+                        username: board_name,
+                        id: op_socket.id
+                    }
+                ]
 
                 op_socket.leave('hosting');
                 socket.leave('hosting');
@@ -61,7 +72,8 @@ class websocketBuilder {
                     op_deck: myDeck,
                     cores: opCores,
                     op_cores: myCores,
-                    active: active==1?true:false
+                    active,
+                    players
                 });
                 socket.emit('duel_start', {
                     op_id: op_socket.id, 
@@ -69,7 +81,8 @@ class websocketBuilder {
                     op_deck: opDeck,
                     cores: myCores,
                     op_cores: opCores,
-                    active: active==1?false:true
+                    active: !active,
+                    players
                 });
             });
 
@@ -158,6 +171,14 @@ class websocketBuilder {
                 op_socket.emit('refresh_all', { player_org });
                 socket.emit('refresh_all', { player_org });
             });
+
+            socket.on('new_message', info => {
+                const op_id = info.op_id;
+                const op_socket = this.findSocket(op_id);
+                if (!op_socket) { return; }
+
+                op_socket.emit('new_message', info);
+            });
         });
     }
 
@@ -168,7 +189,7 @@ class websocketBuilder {
     getRooms() {
         const ids = this.io.sockets.adapter.rooms.get('hosting');
         const ids_array = ids?Array.from(ids):[];
-        const users = ids_array.map(id => this.io.sockets.sockets.get(id).board_name);
+        const users = ids_array.map(id => this.io.sockets.sockets.get(id).username);
         return users;
     }
 }
