@@ -1,3 +1,5 @@
+const { Card, Core } = require('./classes');
+
 function createCode(num) {
     const lower = 'abcdefghijklmnopqrstuvwxyz';
     const upper = lower.toUpperCase();
@@ -12,25 +14,6 @@ function createCode(num) {
     return code;
 }
 
-class Card {
-    constructor(id, code) {
-        this.id = id;
-        this.code = code;
-        this.url = `https://battlespirits-saga.com/images/cards/card/${code}.png`;
-        this.seted = false;
-        this.rested = false;
-        this.cores = []
-    }
-}
-
-class Core {
-    constructor(id, soul = false) {
-        this.id = id;
-        this.soul = soul;
-        this.selected = false;
-    }
-}
-
 function createCoresObject() {
     return {
         in_life: Array.from({length: 5}, () => new Core(createCode(5))),
@@ -42,7 +25,6 @@ function createCoresObject() {
         in_void: []
     }
 }
-
 function buidDeck(deckString) {
     const deckCodes = deckString.substring(1, deckString.length - 1).split(',');
     const deck = deckCodes.map(code => new Card(createCode(11), code));
@@ -66,4 +48,16 @@ function generateRandomTurn() {
     return Math.round(Math.random());
 }
 
-module.exports = {Core, createCode, buidDeck, createCoresObject, generateRandomTurn};
+function findSocket(io, id) {
+    return io.sockets.sockets.get(id);
+}
+
+function getRooms(io) {
+    const ids = io.sockets.adapter.rooms.get('hosting');
+    const ids_array = ids?Array.from(ids):[];
+    const users = ids_array.map(id => io.sockets.sockets.get(id).username);
+    return users;
+}
+
+module.exports = { createCode, createCoresObject, 
+    buidDeck, shuffleArray, generateRandomTurn, findSocket, getRooms };
