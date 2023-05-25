@@ -7,7 +7,7 @@ function roomsManager (io, socket) {
         const exist = ids_array.some(id => id == socket.id);
         
         if (exist) {
-            socket.emit('socket_message', {msg: "You are alredy hosting a room..."});
+            socket.emit('socket_message', { msg: "You are alredy hosting a room..." });
             return;
         }
 
@@ -15,27 +15,41 @@ function roomsManager (io, socket) {
         const deckString = info.deck;
 
         socket.username = username;
-        socket.deck = deckString;
+        socket.deckString = deckString;
         socket.join('hosting');
     });
 
+    socket.on('request_duel', info => {
+        const { board_id, username, deckString } = info;
+        console.log(info);
+
+        socket.username = username + '_' + createCode(5);
+        socket.deckString = deckString;
+
+        const op_socket = findSocket(io, board_id);
+        if (!op_socket) { return; }
+        
+        op_socket.emit('request_duel', { username: socket.username, user_id: socket.id });
+    });
+
+    socket.on('accept_duel', info => {
+        const { op_id } = info;
+        const op_socket = findSocket(io, op_id);
+        if (!op_socket) { return; }
+
+        op_socket.emit('accept_duel', { op_id: socket.id });
+    });
+
     socket.on('start_duel', (info) => {
-        const { board_name, deckString, username } = info;
-        socket.username = username;
+        const { op_id } = info;
+        const deckString = socket.deckString;
+        const username = socket.username;
 
-        const ids = io.sockets.adapter.rooms.get('hosting');
-        const ids_array = ids?Array.from(ids):[];
-        console.log(ids_array);
-        const oponent_idx = ids_array.findIndex(id => io.sockets.sockets.get(id).username == board_name);
+        const op_socket = findSocket(io, op_id);
+        if (!op_socket) { return; }
 
-        if (oponent_idx == -1) {
-            socket.emit('socket_message', {msg: "Oponent not found..."});
-            return;
-        }
-
-        const op_socket = findSocket(io, ids_array[oponent_idx]);
         const myDeck = buidDeck(deckString);
-        const opDeck = buidDeck(op_socket.deck);
+        const opDeck = buidDeck(op_socket.deckString);
         const myCores = createCoresObject();
         const opCores = createCoresObject();
         const active = generateRandomTurn()==1;
@@ -45,7 +59,7 @@ function roomsManager (io, socket) {
                 id: socket.id
             },
             {
-                username: board_name,
+                username: op_socket.username,
                 id: op_socket.id
             }
         ]

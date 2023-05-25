@@ -55,7 +55,8 @@ function findSocket(io, id) {
 function getRooms(io) {
     const ids = io.sockets.adapter.rooms.get('hosting');
     const ids_array = ids?Array.from(ids):[];
-    const users = ids_array.map(id => io.sockets.sockets.get(id).username);
+    const sockets = io.sockets.sockets;
+    const users = ids_array.map(id => ({ username: sockets.get(id).username, id: sockets.get(id).id }));
     return users;
 }
 
