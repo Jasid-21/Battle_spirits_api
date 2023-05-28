@@ -17,6 +17,13 @@ function roomsManager (io, socket) {
         socket.username = username;
         socket.deckString = deckString;
         socket.join('hosting');
+        socket.emit('hosting_room', { username });
+    });
+
+    socket.on('cancel_hosting', () => {
+        socket.leave('hosting');
+        socket.username = '';
+        socket.deckString = '';
     });
 
     socket.on('request_duel', info => {
@@ -28,6 +35,10 @@ function roomsManager (io, socket) {
 
         const op_socket = findSocket(io, board_id);
         if (!op_socket) { return; }
+        if (!op_socket.rooms.has('hosting')) {
+            socket.emit('socket_message', { msg: "This user is no longer hosting..." });
+            return;
+        }
         
         op_socket.emit('request_duel', { username: socket.username, user_id: socket.id });
     });
@@ -36,8 +47,24 @@ function roomsManager (io, socket) {
         const { op_id } = info;
         const op_socket = findSocket(io, op_id);
         if (!op_socket) { return; }
+        if (op_socket.rooms.has('dueling')) {
+            socket.emit('socket_message', { msg: "This user alredy on a duel..." });
+            return;
+        }
 
         op_socket.emit('accept_duel', { op_id: socket.id });
+    });
+
+    socket.on('leave_room', info => {
+        socket.leave('dueling');
+
+        const { op_id } = info;
+        const op_socket = findSocket(io, op_id);
+        if (!op_socket) { return; }
+        if (op_socket.rooms.has('dueling')) {
+            const params = { msg: 'Your oponent has left the room...', player_org: socket.id };
+            op_socket.emit('new_message', params);
+        }
     });
 
     socket.on('start_duel', (info) => {

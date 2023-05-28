@@ -12,9 +12,7 @@ const { Server } = require('socket.io');
 class websocketBuilder {
     constructor (http) {
         this.io = new Server(http, {
-            cors: {origin: '*'}, 
-            pingInterval: 1000*60*5, 
-            pingTimeout: 10000
+            cors: {origin: '*'}
         });
 
         this.io.on('connection', socket => {

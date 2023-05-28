@@ -16,11 +16,11 @@ function playerManager(io, socket) {
         op_socket.emit('change_phase', { name });
     });
 
-    socket.on('change_turn', ({ op_id }) => {
+    socket.on('change_turn', ({ player_org, op_id }) => {
         const op_socket = findSocket(io, op_id);
         if (!op_socket) { return; }
 
-        op_socket.emit('change_turn');
+        op_socket.emit('change_turn', { player_org });
     });
 
     socket.on('new_message', info => {

@@ -32,6 +32,22 @@ function cardStates(io, socket) {
 
         op_socket.emit('reveal_cards', info);
     });
+
+    socket.on('select_card', info => {
+        const op_id = info.op_id;
+        const op_socket = findSocket(io, op_id);
+        if (!op_socket) { return; }
+
+        op_socket.emit('select_card', info);
+    });
+
+    socket.on('activate_effect', info => {
+        const op_id = info.op_id;
+        const op_socket = findSocket(io, op_id);
+        if (!op_socket) { return; }
+
+        op_socket.emit('activate_effect', info);
+    });
 }
 
 module.exports = cardStates;
