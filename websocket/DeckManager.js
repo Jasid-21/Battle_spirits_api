@@ -23,8 +23,7 @@ function deckManager(io, socket) {
 
         const op_socket = findSocket(io, op_id);
         if (!op_socket) { return; }
-
-        console.log(deck);
+        
         const newDeck = shuffleArray(deck);
         socket.emit('shuffle_deck', { deck: newDeck, player_org: socket.id });
         op_socket.emit('shuffle_deck', { deck: newDeck, player_org: socket.id });

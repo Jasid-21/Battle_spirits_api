@@ -28,7 +28,6 @@ function roomsManager (io, socket) {
 
     socket.on('request_duel', info => {
         const { board_id, username, deckString } = info;
-        console.log(info);
 
         socket.username = username + '_' + createCode(5);
         socket.deckString = deckString;
