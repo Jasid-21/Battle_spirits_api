@@ -17,6 +17,7 @@ function playerManager(io, socket) {
     });
 
     socket.on('change_turn', ({ player_org, op_id }) => {
+        console.log(player_org);
         const op_socket = findSocket(io, op_id);
         if (!op_socket) { return; }
 
